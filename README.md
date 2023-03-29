@@ -3,12 +3,15 @@
 This repository provides the Pytorch implementation for performing an adversarial patch attack on a saliency model (TranSalNet) using methods from the paper Adversarial Patch which performed attacks on an image classification model.<br>
 
 ## Requirements
-- Python 3.8
-- Pytorch 1.7.1
-- Torchvision 0.8.2
-- OpenCV-Python 4.5.1
+- Python 3.9.12
+- Pytorch 1.13.1
+- Torchvision 0.14.1
+- OpenCV-Python 4.7.0.72
 - SciPy 1.6.0
 - tqdm 4.56.0
+- matplotlib 3.7.1
+- scikit-image 0.20.0
+- pandas 1.5.3
   
 ## TranSalNet Pretrained Models
 TranSalNet has been implemented in two variants: **TranSalNet_Res** with the CNN backbone of **ResNet-50** and **TranSalNet_Dense** with the CNN backbone of **DenseNet-161**.  
