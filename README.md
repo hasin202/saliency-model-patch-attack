@@ -1,11 +1,6 @@
-# TranSalNet: Towards perceptually relevant visual saliency prediction <br>
+# Performing adversarial patch attacks on a saliency model <br>
   
-This repository provides the Pytorch implementation of **TranSalNet: Towards perceptually relevant visual saliency prediction** published in the [Neurocomputing paper](https://doi.org/10.1016/j.neucom.2022.04.080).<br>
-
-***Overview***: <br>
-  
-![arch](https://github.com/LJOVO/TranSalNet/blob/master/Figures/arch.png?raw=true)
-  
+This repository provides the Pytorch implementation for performing an adversarial patch attack on a saliency model (TranSalNet) using methods from the paper Adversarial Patch which performed attacks on an image classification model.<br>
 
 ## Requirements
 - Python 3.8
@@ -15,7 +10,7 @@ This repository provides the Pytorch implementation of **TranSalNet: Towards per
 - SciPy 1.6.0
 - tqdm 4.56.0
   
-## Pretrained Models
+## TranSalNet Pretrained Models
 TranSalNet has been implemented in two variants: **TranSalNet_Res** with the CNN backbone of **ResNet-50** and **TranSalNet_Dense** with the CNN backbone of **DenseNet-161**.  
 Pre-trained models on SALICON training set for the above two variants can be download at:  
  - TranSalNet_Res: [Google Drive](https://drive.google.com/file/d/14czAAQQcRLGeiddPOM6AaTJTieu6QiHy/view?usp=sharing) / [BaiduYun](https://pan.baidu.com/s/1bDSCyM6BWJrhpLaUL9CIhg) (access code: 1234)
@@ -27,7 +22,7 @@ It is also necessary to download ResNet-50 (for TranSalNet_Res) and DenseNet-161
   
 
   
-## Quick Start
+## TranSalNet Quick Start
 The pre-trained models should be downloaded and put in the folder named `pretrained_models` in the code folder first, then the following example codes can be used smoothly.  
 We have prepared two Jupyter Notebook files (.ipynb) for usage of TranSalNet.  
 - Testing: `testing.ipynb`. It can be used to compute and obtain the visual saliency maps of input images.     
@@ -57,17 +52,5 @@ In the above two .ipynb files, it is possible to choose whether TranSalNet_Res o
   
 ___Please note: The spatial size of inputs should be 384×288 (width×height).___
   
-## Citation
-If this work is helpful, please consider citing:  
-  ```
-@article{TranSalNet,
-title = {TranSalNet: Towards perceptually relevant visual saliency prediction},
-journal = {Neurocomputing},
-year = {2022},
-issn = {0925-2312},
-doi = {https://doi.org/10.1016/j.neucom.2022.04.080},
-author = {Jianxun Lou and Hanhe Lin and David Marshall and Dietmar Saupe and Hantao Liu},
-}
-  ```
 
 
