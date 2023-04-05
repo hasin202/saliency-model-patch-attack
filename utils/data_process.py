@@ -27,7 +27,7 @@ def preprocess_img(img_dir, channels=3):
         if new_cols > shape_c:
             new_cols = shape_c
         img_padded[:,
-        ((img_padded.shape[1] - new_cols) // 2):((img_padded.shape[1] - new_cols) // 2 + new_cols)] = img
+                   ((img_padded.shape[1] - new_cols) // 2):((img_padded.shape[1] - new_cols) // 2 + new_cols)] = img
     else:
         new_rows = (original_shape[0] * shape_c) // original_shape[1]
         img = cv2.resize(img, (shape_c, new_rows))
@@ -35,7 +35,9 @@ def preprocess_img(img_dir, channels=3):
         if new_rows > shape_r:
             new_rows = shape_r
         img_padded[((img_padded.shape[0] - new_rows) // 2):((img_padded.shape[0] - new_rows) // 2 + new_rows),
-        :] = img
+                   :] = img
+
+    img_padded = cv2.cvtColor(img_padded, cv2.COLOR_BGR2RGB)
 
     return img_padded
 
@@ -109,8 +111,3 @@ class MyDataset(Dataset):
         sample = {'image': img, 'saliency': smap, 'fixation': fmap}
 
         return sample
-
-
-
-
-
