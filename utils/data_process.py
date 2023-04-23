@@ -1,9 +1,9 @@
 import cv2
 from PIL import Image
 import numpy as np
-import os
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def preprocess_img(img_dir, channels=3):
@@ -37,8 +37,6 @@ def preprocess_img(img_dir, channels=3):
         img_padded[((img_padded.shape[0] - new_rows) // 2):((img_padded.shape[0] - new_rows) // 2 + new_rows),
                    :] = img
 
-    img_padded = cv2.cvtColor(img_padded, cv2.COLOR_BGR2RGB)
-
     return img_padded
 
 
@@ -55,11 +53,13 @@ def postprocess_img(pred, org_dir):
     if rows_rate > cols_rate:
         new_cols = (predictions_shape[1] * shape_r) // predictions_shape[0]
         pred = cv2.resize(pred, (new_cols, shape_r))
-        img = pred[:, ((pred.shape[1] - shape_c) // 2):((pred.shape[1] - shape_c) // 2 + shape_c)]
+        img = pred[:, ((pred.shape[1] - shape_c) // 2)
+                       :((pred.shape[1] - shape_c) // 2 + shape_c)]
     else:
         new_rows = (predictions_shape[0] * shape_c) // predictions_shape[1]
         pred = cv2.resize(pred, (shape_c, new_rows))
-        img = pred[((pred.shape[0] - shape_r) // 2):((pred.shape[0] - shape_r) // 2 + shape_r), :]
+        img = pred[((pred.shape[0] - shape_r) // 2)
+                    :((pred.shape[0] - shape_r) // 2 + shape_r), :]
 
     return img
 
@@ -111,3 +111,43 @@ class MyDataset(Dataset):
         sample = {'image': img, 'saliency': smap, 'fixation': fmap}
 
         return sample
+
+
+def load_input_image(path):
+
+    # padding and resizing input image into 384x288
+    original_image = preprocess_img(path)
+    # normalising values
+    original_image = np.array(original_image)/255.
+
+    return original_image
+
+
+def form_target_map(input_img, x, y, radius, brightness):
+    blank = np.zeros(input_img.shape[:2])
+
+    # Create the target saliency map from all of the circle coordinates and other information
+    for i in range(len(x)):
+        if i == 0:
+            target_map = cv2.circle(
+                blank, (x[i], y[i]), radius[i], brightness[i], -1)
+        else:
+            target_map = cv2.circle(
+                target_map, (x[i], y[i]), radius[i], brightness[i], -1)
+
+    return target_map
+
+
+def form_target_map_mask(input_img, x, y, radius, brightness):
+    blank = np.zeros(input_img.shape[:2])
+
+    # Create the target saliency map from all of the circle coordinates and other information
+    for i in range(len(x)):
+        if i == 0:
+            target_map = cv2.circle(
+                blank, (x[i], y[i]), radius[i], 255, -1)
+        else:
+            target_map = cv2.circle(
+                target_map, (x[i], y[i]), radius[i], 255, -1)
+
+    return target_map
