@@ -36,6 +36,7 @@ def preprocess_img(img_dir, channels=3):
             new_rows = shape_r
         img_padded[((img_padded.shape[0] - new_rows) // 2):((img_padded.shape[0] - new_rows) // 2 + new_rows),
                    :] = img
+    print(img_padded.shape)
 
     return img_padded
 
@@ -53,13 +54,11 @@ def postprocess_img(pred, org_dir):
     if rows_rate > cols_rate:
         new_cols = (predictions_shape[1] * shape_r) // predictions_shape[0]
         pred = cv2.resize(pred, (new_cols, shape_r))
-        img = pred[:, ((pred.shape[1] - shape_c) // 2)
-                       :((pred.shape[1] - shape_c) // 2 + shape_c)]
+        img = pred[:, ((pred.shape[1] - shape_c) // 2):((pred.shape[1] - shape_c) // 2 + shape_c)]
     else:
         new_rows = (predictions_shape[0] * shape_c) // predictions_shape[1]
         pred = cv2.resize(pred, (shape_c, new_rows))
-        img = pred[((pred.shape[0] - shape_r) // 2)
-                    :((pred.shape[0] - shape_r) // 2 + shape_r), :]
+        img = pred[((pred.shape[0] - shape_r) // 2):((pred.shape[0] - shape_r) // 2 + shape_r), :]
 
     return img
 
@@ -124,6 +123,7 @@ def load_input_image(path):
 
 
 def form_target_map(input_img, x, y, radius, brightness):
+    print(input_img.shape[:2])
     blank = np.zeros(input_img.shape[:2])
 
     # Create the target saliency map from all of the circle coordinates and other information
@@ -134,6 +134,8 @@ def form_target_map(input_img, x, y, radius, brightness):
         else:
             target_map = cv2.circle(
                 target_map, (x[i], y[i]), radius[i], brightness[i], -1)
+
+    target_map = cv2.GaussianBlur(target_map, (0, 0), sigmaX=5, sigmaY=5)
 
     return target_map
 
