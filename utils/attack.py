@@ -6,7 +6,8 @@ import numpy as np
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-def attack(model, img, target_saliency, target_mask, loss_target, lr):
+def attack(model, img, target_saliency, target_mask, loss_target, lr, mask):
+    print(mask)
     loss_fn = SaliencyLoss()
     loss, iterations = 0, 0
     original_img = torch.clone(img)
@@ -28,17 +29,17 @@ def attack(model, img, target_saliency, target_mask, loss_target, lr):
 
         print(loss)
         print(lr)
+        if mask == True:
+            img = img.squeeze().detach().permute(1, 2, 0).numpy()
+            mask = cv2.bitwise_and(
+                img, img, mask=np.expand_dims(target_mask, axis=-1))
+            original_img = cv2.bitwise_and(original_img, original_img, mask=cv2.bitwise_not(
+                np.expand_dims(target_mask, axis=-1)))
+            img = cv2.addWeighted(mask, 1, original_img, 1, 0)
 
-        img = img.squeeze().detach().permute(1, 2, 0).numpy()
-        mask = cv2.bitwise_and(
-            img, img, mask=np.expand_dims(target_mask, axis=-1))
-        original_img = cv2.bitwise_and(original_img, original_img, mask=cv2.bitwise_not(
-            np.expand_dims(target_mask, axis=-1)))
-        img = cv2.addWeighted(mask, 1, original_img, 1, 0)
-
-        img = torch.from_numpy(img)
-        img = img.type(torch.FloatTensor).to(device)
-        img = torch.permute(img, (2, 0, 1)).unsqueeze(0)
+            img = torch.from_numpy(img)
+            img = img.type(torch.FloatTensor).to(device)
+            img = torch.permute(img, (2, 0, 1)).unsqueeze(0)
 
         iterations = iterations + 1
 

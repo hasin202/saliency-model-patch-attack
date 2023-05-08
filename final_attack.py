@@ -7,8 +7,8 @@ from utils.load_model import load_model
 from utils.display import display
 from utils.attack import attack
 import numpy as np
+import os
 from torchvision.utils import save_image
-
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -20,17 +20,15 @@ ref_arg2 = parser.add_argument('--lr', type=int, default=1,
                                help="The goal loss function value")
 ref_arg3 = parser.add_argument('--img', type=str, default="./example/1.jpg",
                                help="The path to the image you would like to perform the attack on")
+ref_arg4 = parser.add_argument('--mask', type=str, default=True,
+                               help="True for only updating pixels in the target region, False for updating all pixels")
 args = parser.parse_args()
 
 model = load_model()
 model.eval()
 
-# if args.target_x > 288 or args.target_x < 0:
-#     raise argparse.ArgumentError(ref_arg1,
-#                                  "Make sure that your target x coordinate is less than 288 but greater than 0!")
-
-radius = 40
-brightness = 0.51
+radius = 10
+brightness = 0.5
 x_coordinates, y_coordinates, radius_arr, brightness_arr = [0], [0], [0], [0]
 
 
@@ -55,13 +53,13 @@ c = load_input_image("./example/6.jpg")
 print(original_image.dtype)
 modified_image = np.copy(original_image)
 
-cv2.namedWindow('Point Coordinates')
+cv2.namedWindow('original image')
 
 # Bind the callback function to the window
-cv2.setMouseCallback('Point Coordinates', click_event)
+cv2.setMouseCallback('original image', click_event)
 
 while True:
-    cv2.imshow('Point Coordinates', modified_image)
+    cv2.imshow('original image', modified_image)
     k = cv2.waitKey(1) & 0xFF
     if k == 27:
         break
@@ -71,7 +69,7 @@ while True:
         radius = radius - 1
     if k == 98 and brightness <= 1:
         brightness = brightness + 0.05
-    if k == 100 and brightness >= 0.51:
+    if k == 100 and brightness >= 0:
         brightness = brightness - 0.05
 
 
@@ -79,36 +77,31 @@ target_map = form_target_map(
     original_image, x_coordinates, y_coordinates, radius_arr, brightness_arr)
 target_map_mask = form_target_map_mask(
     original_image, x_coordinates, y_coordinates, radius_arr, brightness_arr)
+target_map_mask = target_map_mask.astype(np.uint8)
 
-
+save_target_map = (target_map*255)
+cv2.imwrite(os.path.basename(os.path.normpath(
+    args.img)), save_target_map)
 display('target', target_map)
 display("mask", target_map_mask)
 
-# original_image = torch.from_numpy(original_image)
-# original_image = original_image.type(torch.FloatTensor).to(device)
-# original_image = torch.permute(original_image, (2, 0, 1)).unsqueeze(0)
+original_image = torch.from_numpy(original_image)
+original_image = original_image.type(torch.FloatTensor).to(device)
+original_image = torch.permute(original_image, (2, 0, 1)).unsqueeze(0)
 
-# target_map = torch.from_numpy(target_map)
-# target_map = target_map.unsqueeze(0).unsqueeze(0)
-
-
-# final_patch, iterations = attack(model,
-#                                  original_image, target_map, target_map_mask, args.loss_target, args.lr)
-
-# final_patch = postprocess_img(
-#     final_patch.squeeze().detach().permute(1, 2, 0), args.img)
-
-# # final_patch = final_patch.squeeze().detach().permute(1, 2, 0).numpy()
-
-# display('final', final_patch)
-target_map_mask = target_map_mask.astype(np.uint8)
-print(np.expand_dims(target_map_mask, axis=-1).shape)
+target_map = torch.from_numpy(target_map)
+target_map = target_map.unsqueeze(0).unsqueeze(0)
 
 
-mask = cv2.bitwise_and(c, c,
-                       mask=np.expand_dims(target_map_mask, axis=-1))
-cutout = cv2.bitwise_and(original_image, original_image, mask=cv2.bitwise_not(
-    np.expand_dims(target_map_mask, axis=-1)))
-edited = cv2.addWeighted(mask, 1, cutout, 1, 0)
-display("tm", edited)
-cv2.destroyAllWindows()
+final_patch, iterations, output = attack(model,
+                                         original_image, target_map, target_map_mask, args.loss_target, args.lr, args.mask)
+
+
+final_patch = postprocess_img(
+    final_patch.squeeze().detach().permute(1, 2, 0), args.img)
+output = postprocess_img(
+    output.squeeze().unsqueeze(0).detach().permute(1, 2, 0), args.img)
+
+
+display('final', final_patch)
+display('output', output)
