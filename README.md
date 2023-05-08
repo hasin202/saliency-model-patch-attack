@@ -2,6 +2,8 @@
 
 This repository provides the Pytorch implementation for performing an adversarial patch attack on a saliency model (TranSalNet) using methods from the paper Adversarial Patch which performed attacks on an image classification model.<br>
 
+All of the generated stimuli that were shown to participants can be found in the folder: generated_stimuli_for_study
+
 ## Requirements
 
 - Python 3.9.12
