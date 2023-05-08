@@ -146,10 +146,10 @@ def form_target_map_mask(input_img, x, y, radius, brightness):
     # Create the target saliency map from all of the circle coordinates and other information
     for i in range(len(x)):
         if i == 0:
-            target_map = cv2.circle(
+            target_map_mask = cv2.circle(
                 blank, (x[i], y[i]), radius[i], 255, -1)
         else:
-            target_map = cv2.circle(
-                target_map, (x[i], y[i]), radius[i], 255, -1)
+            target_map_mask = cv2.circle(
+                target_map_mask, (x[i], y[i]), radius[i], 255, -1)
 
-    return target_map
+    return target_map_mask
